@@ -1,7 +1,7 @@
 from docxtpl import DocxTemplate
-import pypandoc
 import subprocess
 import os
+import fitz
 
 doc = DocxTemplate('sim_rp.docx')
 
@@ -32,4 +32,11 @@ pdf_folder = os.path.abspath(current_directory)
 
 convert_to_pdf = f"libreoffice --headless --convert-to pdf {absolute_path} --outdir {pdf_folder}"
 subprocess.run(convert_to_pdf, shell=True)
+merged_pdf = fitz.open()
+pdf_document = fitz.open('test_similarity.pdf')
+merged_pdf.insert_pdf(pdf_document)
+pdf_document = fitz.open('test.pdf')
+merged_pdf.insert_pdf(pdf_document)
+
+merged_pdf.save('final.pdf')
 
