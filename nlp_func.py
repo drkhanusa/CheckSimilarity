@@ -1,7 +1,9 @@
 import fitz  # PyMuPDF
 import nltk
 import torch
-
+from docxtpl import DocxTemplate
+import os
+import subprocess
 
 def read_pdf(file_path):
     doc = fitz.open(file_path)
@@ -120,22 +122,48 @@ def highlight_duplicates_in_pdf(pdf_path, duplicate_sentences_dict, colors):
     return doc
 
 def highlight_and_sumary_pdf(pdf_path, duplicate_sentences, summary_text):
-    colors = [(1, 0.6, 0.6), (0.6, 1, 0.6), (1, 0.8, 0.6), (0.8, 0.7, 0.6), (0.6, 1, 1)]
-    doc = highlight_duplicates_in_pdf(pdf_path, duplicate_sentences, colors)
     colors = [
-        (0.4, 0, 0.6),
-        (0, 1, 0),
-        (1, 0.5, 0),
-        (0.6, 0.3, 0),
-        (0, 1, 1),
+        
+        (1.0, 0.8, 0.8), # đỏ
+        (1.0, 0.8, 1.0), # tím
+        (0.6, 0.8, 1), # xanh nước biển
+        (0.6, 1.0, 0.8), # xanh lá cây
+        (1.0, 0.8, 0.4), # vàng
+        
     ]
-    summary_page = doc.new_page(width=doc[0].rect.width, height=doc[0].rect.height)
-    summary_page.insert_text((200, 72), "Summary of duplications:", fontsize=16, color=(1, 0, 0))
-    summary_page.insert_text((240, 100), summary_text[0][0], fontsize=16, color=(1, 0, 0))
-    space = 0
-    for i in range(1, len(summary_text)):
-        text = f"{summary_text[i][0]}: {summary_text[i][1]}%"
-        summary_page.insert_text((72, 130+space), text, fontsize=12, color=colors[i-1])
-        space += 30
+    doc = highlight_duplicates_in_pdf(pdf_path, duplicate_sentences, colors)
+    docx = DocxTemplate('./docxtemplate/sim_rp.docx')
+
+    context = {
+        "file_name": summary_text['file_name'],
+        "sim": summary_text['Total_percent'],
+        "sim_name1": summary_text['sim_name1'],
+        "sim1": summary_text['sim1'],
+        "sim_name2": summary_text['sim_name2'],
+        "sim2": summary_text['sim2'],
+        "sim_name3": summary_text['sim_name3'],
+        "sim3": summary_text['sim3'],
+        "sim_name4": summary_text['sim_name4'],
+        "sim4": summary_text['sim4'],
+        "sim_name5": summary_text['sim_name5'],
+        "sim5": summary_text['sim5'],
+    }
+    docx.render(context)
+    docx.save("./docxtemplate/test.docx")
+
+    current_directory = os.path.abspath(os.getcwd())
+    docx_path = f'{current_directory}/docxtemplate/test.docx'
+
+    absolute_path = os.path.abspath(docx_path)
+    pdf_folder = f'{os.path.abspath(current_directory)}/docxtemplate'
+
+    convert_to_pdf = f"libreoffice --headless --convert-to pdf {absolute_path} --outdir {pdf_folder}"
+    subprocess.run(convert_to_pdf, shell=True)
+    pdf_document = fitz.open(f'{pdf_folder}/test.pdf')
+    doc.insert_pdf(pdf_document)
     output_path = "final_output_with_summary.pdf"
     doc.save(output_path)
+    if os.path.exists(absolute_path):
+        os.remove(absolute_path)
+    if os.path.exists(f'{pdf_folder}/test.pdf'):
+        os.remove(f'{pdf_folder}/test.pdf')
