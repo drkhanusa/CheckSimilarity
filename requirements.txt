@@ -1,3 +1,12 @@
 PyMuPDF
 torch
 transformers
+nltk
+numpy
+pandas
+fastapi
+uvicorn
+time
+scikit-learn
+os
+docx2pdf
