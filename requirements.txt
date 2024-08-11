@@ -5,7 +5,7 @@ nltk
 numpy
 pandas
 fastapi
-uvicorn
+uvicorn==0.30.5
 time
 scikit-learn
 os
