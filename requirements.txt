@@ -1,0 +1,10 @@
+PyMuPDF
+torch
+transformers
+nltk
+numpy
+pandas
+time
+scikit-learn
+os
+docx2pdf
