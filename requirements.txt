@@ -4,7 +4,6 @@ transformers
 nltk
 numpy
 pandas
-fastapi
 time
 scikit-learn
 os
